@@ -11,8 +11,7 @@ par(mfrow=c(1,1)); plot(dat,lwd=2)
 
 # linear svm
 require(kernlab)  # ksvm
-linsvm <- ksvm(dat$x,dat$c,type="C-svc", kernel="vanilladot")
-linsvm    
+linsvm <- ksvm(dat$x,dat$c,type="C-svc", kernel="vanilladot"); linsvm    
 
 # prediction
 tdat <- mlbench.2dnormals(1000,cl=2,sd=1)  # test data
@@ -20,8 +19,7 @@ predy <- predict(linsvm,tdat$x) # prediction
 mean(predy != tdat$c)           # test error
 
 # plot decision boundary
-source('Rscripts.r')
-par(mfrow=c(1,1)); PlotDB(linsvm,dat,main="linear SVM")
+source('Rscripts.r'); par(mfrow=c(1,1)); PlotDB(linsvm,dat,main="linear SVM")
 
 
 
@@ -29,13 +27,9 @@ par(mfrow=c(1,1)); PlotDB(linsvm,dat,main="linear SVM")
 ## R seminar 3-2: kernel-SVM
 ##############################
   
-# data
-require(mlbench)
-# training data
-dat  <- mlbench.spirals(300, cycles=1,sd=0.15) 
-# test data
-tdat <- mlbench.spirals(1000,cycles=1,sd=0.15) 
-
+require(mlbench)  # mlbench.spirals
+dat  <- mlbench.spirals(300, cycles=1,sd=0.15) # training data 
+tdat <- mlbench.spirals(1000,cycles=1,sd=0.15) # test data
 # plot training data
 par(mfrow=c(1,1)); plot(dat, lwd=2)
 
@@ -43,17 +37,13 @@ require(kernlab)  # ksvm
 
 # kernel svm(poly kernel)
 # poly-kernel: degree=2
-sv2 <- ksvm(dat$x,dat$c,kernel="polydot", kpar=list(degree=2))  
-sv2
-
+sv2 <- ksvm(dat$x,dat$c,kernel="polydot", kpar=list(degree=2)); sv2
 # test error
 mean(predict(sv2,tdat$x)!=tdat$c)   
 
 # kernel svm(poly kernel)
 # poly-kernel: degree=3
-sv3 <- ksvm(dat$x,dat$c,kernel="polydot",kpar=list(degree=3))
-sv3
-
+sv3 <- ksvm(dat$x,dat$c,kernel="polydot",kpar=list(degree=3));sv3
 # test error
 mean(predict(sv3,tdat$x)!=tdat$c)  
 
@@ -64,21 +54,17 @@ PlotDB(sv3,dat,len=300,main="poly: degree=3")
 
 # cross validation
 # degree=2
-sv <- ksvm(dat$x,dat$c, cross=10, kernel="polydot",kpar=list(degree=2))
-cross(sv)
+sv <- ksvm(dat$x,dat$c, cross=10, kernel="polydot",kpar=list(degree=2));cross(sv)
 
 # degree=3
-sv <- ksvm(dat$x,dat$c, cross=10, kernel="polydot",kpar=list(degree=3))
-cross(sv)
+sv <- ksvm(dat$x,dat$c, cross=10, kernel="polydot",kpar=list(degree=3));cross(sv)
 
 # cross validation
 # degree=4
-sv <- ksvm(dat$x,dat$c, cross=10, kernel="polydot",kpar=list(degree=4))
-cross(sv)
+sv <- ksvm(dat$x,dat$c, cross=10, kernel="polydot",kpar=list(degree=4));cross(sv)
 
 # degree=5
-sv <- ksvm(dat$x,dat$c, cross=10, kernel="polydot",kpar=list(degree=5))
-cross(sv)
+sv <- ksvm(dat$x,dat$c, cross=10, kernel="polydot",kpar=list(degree=5));cross(sv)
 
 
 
@@ -100,8 +86,7 @@ require(doParallel)            # foreach
 
 # cross validation for sigma in Gauss kernel
 # sigma candidates
-sc <- exp(seq(log(0.01),log(100),l=30))  
-sc
+sc <- exp(seq(log(0.01),log(100),l=30));sc
 
 # cross validation error and test error
 err <- foreach(s=sc,.combine=rbind)%do%{
@@ -111,13 +96,11 @@ err <- foreach(s=sc,.combine=rbind)%do%{
               cross=10,                # 10-fold CV
               kpar=list(sigma=s), C=1) # model par.
   # error
-  data.frame(cv=cross(kcv),
-             test=mean(predict(kcv,td$x)!=td$c))
+  data.frame(cv=cross(kcv),test=mean(predict(kcv,td$x)!=td$c))
 }
 
 # optimal sigma
-opts <- sc[which.min(err$cv)]
-opts
+opts <- sc[which.min(err$cv)]; opts
 
 # plot cv error
 par(mfrow=c(1,1))
@@ -129,10 +112,8 @@ lines(sc,err$test,col=2,lwd=2)
 ##############################
 ## R seminar 3-4: multiclass
 ##############################  
-
-# data
-require(kernlab)
-require(mlbench)
+require(kernlab)  # ksvm
+require(mlbench)  # mlbench.2dnormals
 G <- 8         # 8 classes
 dat  <- mlbench.2dnormals(500, cl=G,sd=0.8) # train
 tdat <- mlbench.2dnormals(1000,cl=G,sd=0.8) # test
