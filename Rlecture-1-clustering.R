@@ -41,16 +41,6 @@ par(mfrow=c(1,2), ps=14); pca <- prcomp(x)  # PCA
 plot(pca$x[,1:2],col=class,main="type of wine",lwd=2) 
 plot(pca$x[,1:2],col=km$cl,main="k-means",lwd=2) 
 
-# k-means for iris data
-# iris data
-x <- scale(iris[,-5]); dim(x)
-class <- iris[,5]
-km <- kmeans(x,3,nstart=10)   # k-means(k=3) 
-
-# plot
-par(mfrow=c(1,2), ps=14); pca <- prcomp(x)   # PCA
-plot(pca$x[,1:2],col=class,main="type of wine",lwd=2) 
-plot(pca$x[,1:2],col=km$cl,main="k-means",lwd=2)
 
 
 
@@ -66,6 +56,7 @@ par(mfrow=c(1,1), ps=14); plot(data,main="data")
 require(kernlab)  # specc
 sc <- specc(data$x, centers=2)  # spectral clustering
 km <- kmeans(data$x,2)          # kmeans
+
 # plot
 par(mfrow=c(1,2), ps=14)
 plot(data$x, col=sc,main='spectral clustering')
@@ -84,10 +75,10 @@ class <- wine[idx,1]         # type of wine
 # hclust: max
 d <- dist(x)     # distance matrix
 hc <- hclust(d)  # hclust
-par(mfrow=c(1,1), ps=14); plot(hc,label=class)  
+par(mfrow=c(1,1), ps=14); plot(hc,label=class,main='max')  
 
 # hclust: Ward
 d <- dist(x)     # distance matrix
 hc <- hclust(d, method='ward.D')  # hclust
-par(mfrow=c(1,1), ps=14); plot(hc,label=class)
+par(mfrow=c(1,1), ps=14); plot(hc,label=class,main='Ward')
 

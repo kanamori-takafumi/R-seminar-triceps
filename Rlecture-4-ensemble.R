@@ -1,5 +1,5 @@
 ##############################
-## R seminar 5-1: decision tree
+## R seminar 4-1: decision tree
 ##############################
 # setting  
 par(family="mono")
@@ -18,12 +18,6 @@ rp$control$cp      # regularization par.
 cat("rpart: training error =",mean(predict(rp,type='class') != d$y))
 par(mfrow=c(1,1)); rpart.plot(rp, roundint=FALSE)  # plot
 
-# rpart with variables: x.grade, x.g2
-rpf <- rpart(y ~ x.grade + x.g2, d) # rpart
-rpf$control$cp # regularization par.
-# training error
-cat("rpart: training error =",mean(predict(rpf,type='class') != d$y)) 
-par(mfrow=c(1,1)); rpart.plot(rpf, roundint=FALSE) # plot
 
 # rpart: cp=0.1
 rq <- rpart(y~.,d,control=rpart.control(cp=0.1))
@@ -32,26 +26,21 @@ rq$control$cp # regularization par.
 cat("rpart: training error =",mean(predict(rq,type='class')!=d$y))
 par(mfrow=c(1,1)); rpart.plot(rq, roundint=FALSE) # plot
 
-# spiral data
-require(mlbench) # mlbench.spirals
- d <- data.frame(mlbench.spirals(200, 1.3,sd=0.1)) # training data
-td <- data.frame(mlbench.spirals(1000,1.3,sd=0.1)) # test data
-# plot training data
-par(mfrow=c(1,1)); plot(d[,1:2],col=d$c,lwd=2,main="data")
 
-# rpart
-rp <- rpart(classes~., d) # learning
-pred <- predict(rp,d,type='class') # prediction
-mean(pred != d$c)                        # training error
-cat("rprt: test error =",mean(predict(rp,td,type='class')!=td$c))  # test error
+# rpart with variables: x.grade, x.g2
+rpf <- rpart(y ~ x.grade + x.g2, d) # rpart
+rpf$control$cp # regularization par.
+# training error
+cat("rpart: training error =",mean(predict(rpf,type='class') != d$y)) 
+par(mfrow=c(1,1)); rpart.plot(rpf, roundint=FALSE) # plot
 
-# plot data
-par(mfrow=c(1,2)); plot(d[,1:2],col=d$c,lwd=2); plot(d[,1:2], col=pred,lwd=2)
-rpart.plot(rp, roundint=FALSE)  # plot tree
+# exercise
+# rpf <- rpart(y ~ x.grade + x.g2, d, control=rpart.control(cp=0.1)) # rpart
+# par(mfrow=c(1,1)); rpart.plot(rpf, roundint=FALSE) # plot
 
 
 ##############################
-## R seminar 5-2: bagging
+## R seminar 4-2: bagging
 ##############################
 # spiral data
 require(mlbench) # mlbench.spirals
@@ -83,65 +72,40 @@ plot(td[,1:2],col=rp_pred,main='rpart'); plot(td[,1:2],col=ba_pred,main='bagging
 
 
 ##############################
-## R seminar 5-3: random forest
+## R seminar 4-3: random forest
 ############################## 
+# libraries
 require(randomForest) # randomForest
-require(rpart) # rpart
-require(ipred) # bagging
+require(rpart)        # stagec data
 
-# spiral data
-require(mlbench) # mlbench.spirals
- d <- data.frame(mlbench.spirals(200, 1.3,sd=0.1))  # training data
-td <- data.frame(mlbench.spirals(1000,1.3,sd=0.1))  # test data
-par(mfrow=c(1,1)); plot(d[,1:2],col=d$c,lwd=2,main="data")
-
-# random forest with 100 trees
-rf <- randomForest(classes~.,d,ntree=100); rf_pred <- predict(rf,td,type='class') # prediction
-cat("random forest: test error =",mean(rf_pred != td$c))  # test error
-
-# other methods: rpart
-rp <- rpart(classes~., d); rp_pred <- predict(rp,td,type='class') # prediction
-cat("rpart: test error =",mean(rp_pred != td$c))  # test error
-
-# other methods: bagging
-ba <- bagging(classes~., d, mfinal=100); ba_pred <- predict(ba,td,type='class') # prediction
-cat("bagging: test error =",mean(ba_pred != td$c)) # test error
-
-# plot: rpart vs. RandomForest
-par(mfrow=c(1,2)); 
-plot(td[,1:2],col=rp_pred,main='rpart'); plot(td[,1:2],col=rf_pred,main='RandomForest')
-
-# plot: bagging vs. RandomForest
-par(mfrow=c(1,2))
-plot(td[,1:2],col=ba_pred,main='bagging');plot(td[,1:2],col=rf_pred,main='RandomForest')
-
-
-# Vowel data
-library(mlbench)  # Vowel data
-data(Vowel)
-d <- data.frame(x=Vowel[,-11], y=as.factor(Vowel[,11])); dim(d)
-idx <- sample(nrow(Vowel),600)  # index of training data 
+# stagec data
+d <- data.frame(x=stagec[3:8],y=as.factor(stagec$pgstat))
+dim(d)
 
 # random forest
-rf <- randomForest(y~., d[idx,], ntree=100, na.action=na.omit); pred <- predict(rf,d[-idx,])  # precition
-cat("random forest: test error =",mean(pred!=d$y[-idx],na.rm=TRUE)) #  test error
+rf <- randomForest(y~., d, ntree=1000, importance=TRUE, na.action=na.omit)
+# importance of variables
+importance(rf)[,3:4]
 
-# rpart
-rp <- rpart(y~., d[idx,], na.action=na.omit); pred <- predict(rp,d[-idx,],type='class')  # precition
-cat("rpart: test error =",mean(pred!=d$y[-idx],na.rm=TRUE)) # test error
+varImpPlot(rf)  # plot
 
-# bagging
-ba <- bagging(y~., d[idx,], na.action=na.omit,mfinal=100); pred <- predict(ba,d[-idx,])  # precition
-cat("bagging: test error =",mean(pred!=d$y[-idx],na.rm=TRUE)) # test error
+# iris data
+data(iris)
+d <- data.frame(x=iris[,-5], y=as.factor(iris[,5]))
+dim(d)
 
+# random forest
+rf <- randomForest(y~., d, ntree=1000,importance=TRUE, na.action=na.omit)
+# importance of variables
+importance(rf)[,4:5]
+
+varImpPlot(rf) # plot
 
 
 ##############################
-## R seminar 5-4: boosting
+## R seminar 4-4: boosting
 ############################## 
 # library
-require(rpart)        # rpart
-require(ipred)        # bagging
 require(randomForest) # randomForest
 require(xgboost)      # xgboost
 require(kernlab)      # spam data
@@ -157,7 +121,7 @@ te <- list(x=as.matrix(x[-idx,]),y=y[-idx]) # test data
 d <- data.frame(tr$x, y=as.factor(tr$y))  # data frame
 
 # ensemble learning: setting
-T <- 500     # num. of trees
+T <- 1000     # num. of trees
 
 # XGBoost
 xgb  <- xgboost(data=tr$x, label=tr$y, 
@@ -168,22 +132,14 @@ xgb  <- xgboost(data=tr$x, label=tr$y,
 xgb_pred <- predict(xgb, te$x) > 1/2   # predict
 cat("xgboost: test error =",mean(xgb_pred != te$y))     # test error
 
-# rpart
-rp <- rpart(y~., d);rp_pred <- predict(rp,data.frame(te$x), type='class'); 
-cat("rpart: test eror =",mean(rp_pred != te$y))  # predict & test error
-
-# bagging
-ba <- bagging(y~., d, mfinal=T); ba_pred <- predict(ba,te$x,type='class') # prediction
-cat("bagging: test error =",mean(ba_pred != te$y)) # test error
-
 # random forest
-rf <- randomForest(y~., d, ntree=T); rf_pred <- predict(rf,te$x,type='class') # predict
+rf <- randomForest(y~., d, ntree=T)
+rf_pred <- predict(rf,te$x,type='class') # predict
 cat("random forest: test error =",mean(rf_pred != te$y)) # test error 
 
 # cross validation for xgboost
-K <- 5
 xcv <- xgb.cv(data=tr$x, label=tr$y, 
-              nfold=K,    # K-cross validation
+              nfold=5,    # 5-cross validation
               nround=T,   # T rounds
               metrics="error", 
               objective="binary:logistic",
@@ -192,7 +148,7 @@ xcv <- xgb.cv(data=tr$x, label=tr$y,
 # plot: training error, cross validation error
 ylim <- range(c(xcv[[4]]$train_error_mean, xcv[[4]]$test_error_mean))
 par(mfrow=c(1,1), ps=14)
- plot(xcv[[4]]$train_error_mean, lwd=2, type='l',log='x',ylim=ylim,xlab='round',ylab='error')
+plot(xcv[[4]]$train_error_mean, lwd=2, type='l',log='x',ylim=ylim,xlab='round',ylab='error')
 lines(xcv[[4]]$test_error_mean,  lwd=2, col=2) 
 lines(rep(min(xcv[[4]]$test_error_mean),T), lty=2)
 legend('topright',legend=c("cv error","training error"), col=c(2,1), lty=c(1,1))
@@ -205,3 +161,4 @@ xgb  <- xgboost(data=tr$x, label=tr$y,
 
 xgb_pred <- predict(xgb, te$x) > 1/2  # predict
 cat("xgboost: test error =",mean(xgb_pred != te$y))   # test error
+

@@ -69,11 +69,13 @@ par(mfrow=c(1,1)); plot(x,y,main="data")
 # data matrix
 Phi <- outer(x,1:8,FUN="^")
 # CV for ridge regression
-l <- 10^(-10:0); cvgl <- cv.glmnet(Phi,y,alpha=0,family="gaussian", nfold=10, lambda=l)
+l <- 10^(-10:0); l
+
+cvgl <- cv.glmnet(Phi,y,alpha=0,family="gaussian", nfold=10, lambda=l)
 # optimal lambda
 cvgl$lambda.min
 # plot cross validation error
-par(mfrow=c(1,1)); plot(cvgl$lambda, cvgl$cvm, log='xy', lwd=2)
+# par(mfrow=c(1,1)); plot(cvgl$lambda, cvgl$cvm, log='xy', lwd=2)
 
 # estimation: optimal lambda
 gl <- glmnet(Phi,y,alpha=0,family="gaussian", lambda=cvgl$lambda.min)

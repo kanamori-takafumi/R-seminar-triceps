@@ -52,20 +52,6 @@ source('Rscripts.r'); par(mfrow=c(1,2), ps=14)
 PlotDB(sv2,dat,len=300,main="poly: degree=2")
 PlotDB(sv3,dat,len=300,main="poly: degree=3")
 
-# cross validation
-# degree=2
-sv <- ksvm(dat$x,dat$c, cross=10, kernel="polydot",kpar=list(degree=2));cross(sv)
-
-# degree=3
-sv <- ksvm(dat$x,dat$c, cross=10, kernel="polydot",kpar=list(degree=3));cross(sv)
-
-# cross validation
-# degree=4
-sv <- ksvm(dat$x,dat$c, cross=10, kernel="polydot",kpar=list(degree=4));cross(sv)
-
-# degree=5
-sv <- ksvm(dat$x,dat$c, cross=10, kernel="polydot",kpar=list(degree=5));cross(sv)
-
 
 
 ##############################
@@ -102,10 +88,31 @@ err <- foreach(s=sc,.combine=rbind)%do%{
 # optimal sigma
 opts <- sc[which.min(err$cv)]; opts
 
-# plot cv error
+# plot decision boundary
+source('Rscripts.r')
+ksv <- ksvm(dat$x,dat$c,type="C-svc",
+                    kernel='rbfdot',
+                    kpar=list(sigma=opts), C=1) 
+PlotDB(ksv,dat,len=300,main="Gauss kernel: optimal sigma")
+
+
+# exercise
+degree <- 3:12
+err <- foreach(s=degree,.combine=rbind)%do%{
+  # cross validation for each sigma
+  kcv <- ksvm(dat$x,dat$c,type="C-svc",
+              kernel='polydot',
+              cross=5,                # 5-fold CV
+              kpar=list(degree=s), C=1) # model par.
+  # test error
+  data.frame(cv=cross(kcv),test=mean(predict(kcv,td$x)!=td$c))
+}
+optd <- degree[which.min(err$cv)]; optd
+ksv <- ksvm(dat$x,dat$c,type="C-svc",
+            kernel='polydot',
+            kpar=list(degree=optd), C=1) 
 par(mfrow=c(1,1))
-plot(sc, err$cv, ylim=range(unlist(err)),log='x')
-lines(sc,err$test,col=2,lwd=2)
+PlotDB(ksv,dat,len=300,main="Gauss kernel: optimal sigma")
 
 
 
@@ -135,3 +142,4 @@ mean(predict(rbfsv,tdat$x)!=tdat$c) # test eror
 source('Rscripts.r'); par(mfrow=c(1,2),ps=14)
 PlotDB(linsv,dat,main="linear")
 PlotDB(rbfsv,dat,main="Gauss")
+
